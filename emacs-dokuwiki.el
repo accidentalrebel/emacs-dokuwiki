@@ -2,6 +2,12 @@
 
 ;;; Commentary:
 
+;;; TODO
+;; * Rename *emacs-dokuwiki-xml-rpc-url* without the asterisks
+;; * Only ask for the URL if the emacs-dokuwiki-xml-rpc-url variable is not set
+;; * Make a variable that would hold the username
+;; * Remove emacs-dokuwiki-setup, just use emacs-dokuwiki-login as the entry point
+
 ;;; Code:
 
 (require 'xml-rpc)
