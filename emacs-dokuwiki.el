@@ -5,7 +5,6 @@
 ;;; Code:
 
 (require 'xml-rpc)
-(require 'dokuwiki-mode)
 
 (defvar *emacs-dokuwiki-xml-rpc-url* "")
 
@@ -27,9 +26,9 @@
 	(if (equal page-content nil)
 	    (error "Emacs-dokuwiki: Could not get the page content from page %s" page-name)
 	  (message "Emacs-dokuwiki: Creating a new buffer for page %s" page-name)
-	  (switch-to-buffer (concat "emacs-dokuwiki:" page-name))
+	  (get-buffer-create (concat page-name ".dwiki"))
+	  (switch-to-buffer (concat page-name ".dwiki"))
 	  (erase-buffer)
-	  (dokuwiki-mode)
 	  (insert page-content))))))
 
 (defun emacs-dokuwiki-get-wiki-title()
