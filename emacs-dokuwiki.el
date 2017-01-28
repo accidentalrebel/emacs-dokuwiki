@@ -16,7 +16,12 @@
     (setq *emacs-dokuwiki-xml-rpc-url* xml-rpc-url)))
 
 (defun emacs-dokuwiki-open-page()
-  "Opens a page from the wiki. If it does not exist, it creates a new page once the buffer is saved."
+  "Opens a page from the wiki.
+
+To open a page in a particular namespace add the namespace name before the page-name. For example, \"namespace:wiki-page\" to open the \"wiki-page\" page inside the \"namespace\" namespace.
+
+If the specified page does not exist, it creates a new page once the buffer is saved.
+"
   (interactive)
   (if (equal *emacs-dokuwiki-xml-rpc-url* "")
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
@@ -33,7 +38,9 @@
 	    (insert page-content))))))
 
 (defun emacs-dokuwiki-save-page()
-  "Saves the current buffer as a page in the wiki"
+  "Saves the current buffer as a page in the wiki.
+
+Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved as \"wikiurl.com/wiki-page\". On the other hand, a buffer of \"namespace:wiki-page.dwiki\" is saved as \"wikiurl.com/namespace:wiki-page\""
   (interactive)
   (if (eq (string-match-p ".dwiki" (buffer-name)) nil)
       (error "Emacs-dokuwiki: The current buffer is not a .dwiki buffer")
