@@ -39,7 +39,10 @@
     (let ((page-name (replace-regexp-in-string ".dwiki" "" (buffer-name))))
       (if (y-or-n-p (concat "Do you want to save the page \"" page-name "\"?"))
 	  (progn
-	    (message "Saving the page \"%s\"" page-name))
+	    (message "Emacs-dokuwiki: Saving the page \"%s\"" page-name)
+	    (let ((summary (read-string "Summary:"))
+		  (minor (y-or-n-p "Is this a minor change?")))
+	      (message "Emacs-dokuwiki: Summary is %s. Minor is %s." summary minor)))
 	(message "Emacs-dokuwiki: Cancelled saving of the page."))
       ))
   )
