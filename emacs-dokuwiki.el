@@ -28,7 +28,11 @@
     (let ((page-name (read-string "Enter page name: ")))
       (message "page name is %s" page-name)
       (let ((page-content (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.getPage page-name)))
-	(message "The content of page %s is %s" page-name page-content)))))
+	(if (equal page-content nil)
+	    (error "Could not get the page content from page %s" page-name)
+	  (message "Creating a new buffer for page %s" page-name)
+	  (switch-to-buffer (concat "emacs-dokuwiki:" page-name))
+	  (insert page-content))))))
 
 (defun emacs-dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
