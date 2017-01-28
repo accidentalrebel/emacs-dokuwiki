@@ -42,7 +42,7 @@
 	    (message "Emacs-dokuwiki: Saving the page \"%s\"" page-name)
 	    (let* ((summary (read-string "Summary:"))
 		   (minor (y-or-n-p "Is this a minor change?"))
-		   (save-success (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary)))))
+		   (save-success (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
 	      (if (eq save-success t)
 		  (message "Emacs-dokuwiki: Saving successful with summary %s and minor of %s." summary minor)
 		(error "Emacs-dokuwiki: Saving unsuccessful!"))))
