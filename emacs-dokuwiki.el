@@ -46,7 +46,9 @@
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let* ((login-name (read-string "Enter login name: "))
 	   (login-password (read-passwd "Enter password: ")))
-      (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'dokuwiki.login login-name login-password))))
+      (if (eq (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'dokuwiki.login login-name login-password) t)
+	  (message "Emacs-dokuwiki: Login successful!")
+	(error "Emacs-dokuwiki: Warning! Login unsuccessful!")))))
 
 (provide 'emacs-dokuwiki)
 ;;; emacs-dokuwiki.el ends here
