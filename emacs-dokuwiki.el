@@ -16,7 +16,7 @@
     (setq *emacs-dokuwiki-xml-rpc-url* xml-rpc-url)))
 
 (defun emacs-dokuwiki-open-page()
-  "Opens a page from the wiki"
+  "Opens a page from the wiki. If it does not exist, it creates a new page once the buffer is saved."
   (interactive)
   (if (equal *emacs-dokuwiki-xml-rpc-url* "")
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
@@ -24,12 +24,13 @@
       (message "emacs-dokuwiki: page name is \"%s\"" page-name)
       (let ((page-content (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.getPage page-name)))
 	(if (equal page-content nil)
-	    (error "Emacs-dokuwiki: Could not get the page content from page \"%s\"" page-name)
-	  (message "Emacs-dokuwiki: Creating a new buffer for page \"%s\"" page-name)
-	  (get-buffer-create (concat page-name ".dwiki"))
-	  (switch-to-buffer (concat page-name ".dwiki"))
-	  (erase-buffer)
-	  (insert page-content))))))
+	    (message "Emacs-dokuwiki: Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
+	  (message "Emacs-dokuwiki: Page exists. Creating buffer for existing page \"%s\"" page-name))
+	(get-buffer-create (concat page-name ".dwiki"))
+	(switch-to-buffer (concat page-name ".dwiki"))
+	(erase-buffer)
+	(when (not (eq page-content nil))
+	    (insert page-content))))))
 
 (defun emacs-dokuwiki-save-page()
   "Saves the current buffer as a page in the wiki"
