@@ -5,6 +5,7 @@
 ;;; Code:
 
 (require 'xml-rpc)
+(require 'dokuwiki-mode)
 
 (defvar *emacs-dokuwiki-xml-rpc-url* "")
 
@@ -12,7 +13,7 @@
   "Initial set up for the dokuwiki"
   (interactive)
   (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
-    (message "emacs-dokuwiki: Saved the wiki url: %s." xml-rpc-url)
+    (message "Emacs-dokuwiki: Saved the wiki url: %s." xml-rpc-url)
     (setq *emacs-dokuwiki-xml-rpc-url* xml-rpc-url)))
 
 (defun emacs-dokuwiki-open-page()
@@ -21,12 +22,14 @@
   (if (equal *emacs-dokuwiki-xml-rpc-url* "")
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let ((page-name (read-string "Enter page name: ")))
-      (message "page name is %s" page-name)
+      (message "emacs-dokuwiki: page name is %s" page-name)
       (let ((page-content (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.getPage page-name)))
 	(if (equal page-content nil)
 	    (error "Emacs-dokuwiki: Could not get the page content from page %s" page-name)
 	  (message "Emacs-dokuwiki: Creating a new buffer for page %s" page-name)
 	  (switch-to-buffer (concat "emacs-dokuwiki:" page-name))
+	  (erase-buffer)
+	  (dokuwiki-mode)
 	  (insert page-content))))))
 
 (defun emacs-dokuwiki-get-wiki-title()
