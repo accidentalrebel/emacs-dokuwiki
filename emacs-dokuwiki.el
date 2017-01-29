@@ -44,26 +44,34 @@
 
 (defvar emacs-dokuwiki-xml-rpc-url nil
   "The url pointing to the \"xmlrpc.php\" file in the wiki to be accessed.")
+(defvar emacs-dokuwiki-login-user-name nil
+  "The user name to use when logging in to the wiki.")
 
 (defun emacs-dokuwiki-login()
   "Connects to the dokuwiki"
   (interactive)
-  (if (equal emacs-dokuwiki-xml-rpc-url nil)
-      (emacs-dokuwiki-set-xml-rpc-url))
-  (let* ((login-name (read-string "Enter login name: "))
-	 (login-password (read-passwd "Enter password: ")))
-    (if (eq (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.login login-name login-password) t)
+  (let ((xml-rpc-url (emacs-dokuwiki--get-xml-rpc-url))
+	(login-user-name (emacs-dokuwiki--get-login-user-name))
+	(login-password (read-passwd "Enter password: ")))
+    (if (eq (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password) t)
 	(message "Emacs-dokuwiki: Login successful!")
       (error "Emacs-dokuwiki: Login unsuccessful! Check if your emacs-dokuwiki-xml-rpc-url or login credentials are correct!"))))
 
-(defun emacs-dokuwiki-set-xml-rpc-url()
-  "Asks and sets the dokuwiki xml-rpc url.
+(defun emacs-dokuwiki--get-xml-rpc-url()
+  "Gets the xml-rpc to be used for logging in."
+  (if (not (equal emacs-dokuwiki-xml-rpc-url nil))
+      emacs-dokuwiki-xml-rpc-url
+    (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
+      (message "Emacs-dokuwiki: The entered wiki url is \"%s\"." xml-rpc-url)
+      xml-rpc-url)))
 
-The function \"emacs-dokuwiki-login\" calls this function automatically. Use this function just in case you want to change the xml-rpc-url manually."
-  (interactive)
-  (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
-    (message "Emacs-dokuwiki: Saved the wiki url \"%s\"." xml-rpc-url)
-    (setq emacs-dokuwiki-xml-rpc-url xml-rpc-url)))
+(defun emacs-dokuwiki--get-login-user-name()
+  "Gets the login user name to be used for logging in."
+  (if (not (equal emacs-dokuwiki-login-user-name nil))
+      emacs-dokuwiki-login-user-name
+    (let ((login-name (read-string "Enter login user name: ")))
+      (message "Emacs-dokuwiki: The entered login user name is \"%s\"." login-name)
+      login-name)))
 
 (defun emacs-dokuwiki-open-page()
   "Opens a page from the wiki.
