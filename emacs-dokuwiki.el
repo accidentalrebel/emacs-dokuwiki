@@ -36,6 +36,7 @@
 
 ;;; TODO
 ;; * Use auth-source in storing login credentials
+;; * Create a function that displays a list of available pages
 
 ;;; Code:
 
