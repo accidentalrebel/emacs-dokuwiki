@@ -35,18 +35,28 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; TODO
-;; * Only ask for the URL if the emacs-dokuwiki-xml-rpc-url variable is not set
 ;; * Make a variable that would hold the username
-;; * Remove emacs-dokuwiki-setup, just use emacs-dokuwiki-login as the entry point
 
 ;;; Code:
 
 (require 'xml-rpc)
 
-(defvar emacs-dokuwiki-xml-rpc-url "")
+(defvar emacs-dokuwiki-xml-rpc-url nil
+  "The url pointing to the \"xmlrpc.php\" file in the wiki to be accessed.")
 
-(defun emacs-dokuwiki-setup()
-  "Initial set up for the dokuwiki"
+(defun emacs-dokuwiki-login()
+  "Connects to the dokuwiki"
+  (interactive)
+  (if (equal emacs-dokuwiki-xml-rpc-url nil)
+      (emacs-dokuwiki-set-xml-rpc-url))
+  (let* ((login-name (read-string "Enter login name: "))
+	 (login-password (read-passwd "Enter password: ")))
+    (if (eq (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.login login-name login-password) t)
+	(message "Emacs-dokuwiki: Login successful!")
+      (error "Emacs-dokuwiki: Login unsuccessful! Check if your emacs-dokuwiki-xml-rpc-url or login credentials are correct!"))))
+
+(defun emacs-dokuwiki-set-xml-rpc-url()
+  "Asks and sets the dokuwiki xml-rpc url."
   (interactive)
   (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
     (message "Emacs-dokuwiki: Saved the wiki url \"%s\"." xml-rpc-url)
@@ -102,17 +112,6 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let ((dokuwiki-title (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "Emacs-dokuwiki: The title of the wiki is \"%s\"" dokuwiki-title))))
-
-(defun emacs-dokuwiki-login()
-  "Connects to the dokuwiki"
-  (interactive)
-  (if (equal emacs-dokuwiki-xml-rpc-url "")
-      (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
-    (let* ((login-name (read-string "Enter login name: "))
-	   (login-password (read-passwd "Enter password: ")))
-      (if (eq (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.login login-name login-password) t)
-	  (message "Emacs-dokuwiki: Login successful!")
-	(error "Emacs-dokuwiki: Warning! Login unsuccessful!")))))
 
 (provide 'emacs-dokuwiki)
 ;;; emacs-dokuwiki.el ends here
