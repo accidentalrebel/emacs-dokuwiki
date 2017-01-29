@@ -1,4 +1,4 @@
-;;; emacs-dokuwiki.el --- Edit DokuWiki Pages using Dokuwiki's XML-RPC API
+;;; emacs-dokuwiki.el --- Edit Remote DokuWiki Pages Using XML-RPC
 
 ;; Copyright (C) 2017 Juan Karlo Licudine
 
@@ -12,7 +12,7 @@
 
 ;;; Commentary:
 
-;; Provides a way to edit a Dokuwiki wiki on Emacs.  Uses Dokuwiki's XML-RPC API.
+;; Provides a way to edit a remote Dokuwiki wiki on Emacs.  Uses Dokuwiki's XML-RPC API.
 
 ;; Usage:
 ;; (require 'emacs-dokuwiki) ;; unless installed as a package
