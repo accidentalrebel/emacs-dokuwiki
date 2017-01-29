@@ -67,10 +67,9 @@
 
 To open a page in a particular namespace add the namespace name before the page-name. For example, \"namespace:wiki-page\" to open the \"wiki-page\" page inside the \"namespace\" namespace.
 
-If the specified page does not exist, it creates a new page once the buffer is saved.
-"
+If the specified page does not exist, it creates a new page once the buffer is saved."
   (interactive)
-  (if (equal emacs-dokuwiki-xml-rpc-url "")
+  (if (equal emacs-dokuwiki-xml-rpc-url nil)
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let ((page-name (read-string "Enter page name: ")))
       (message "emacs-dokuwiki: page name is \"%s\"" page-name)
@@ -108,7 +107,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 (defun emacs-dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
   (interactive)
-  (if (equal emacs-dokuwiki-xml-rpc-url "")
+  (if (equal emacs-dokuwiki-xml-rpc-url nil)
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let ((dokuwiki-title (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "Emacs-dokuwiki: The title of the wiki is \"%s\"" dokuwiki-title))))
