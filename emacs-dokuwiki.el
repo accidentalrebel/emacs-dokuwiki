@@ -36,6 +36,7 @@
 
 ;;; TODO
 ;; * Make a variable that would hold the username
+;; * Use auth-source in storing login credentials
 
 ;;; Code:
 
@@ -56,7 +57,9 @@
       (error "Emacs-dokuwiki: Login unsuccessful! Check if your emacs-dokuwiki-xml-rpc-url or login credentials are correct!"))))
 
 (defun emacs-dokuwiki-set-xml-rpc-url()
-  "Asks and sets the dokuwiki xml-rpc url."
+  "Asks and sets the dokuwiki xml-rpc url.
+
+The function \"emacs-dokuwiki-login\" calls this function automatically. Use this function just in case you want to change the xml-rpc-url manually."
   (interactive)
   (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
     (message "Emacs-dokuwiki: Saved the wiki url \"%s\"." xml-rpc-url)
