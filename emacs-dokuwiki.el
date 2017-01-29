@@ -1,6 +1,6 @@
 ;;; emacs-dokuwiki.el --- Edit DokuWiki Pages using Dokuwiki's XML-RPC API
 
-;; Copyright (C) 2017 Juan Karlo Lidudine
+;; Copyright (C) 2017 Juan Karlo Licudine
 
 ;; Author: Juan Karlo Licudine <accidentalrebel@gmail.com>
 ;; URL: http://www.github.com/accidentalrebel/emacs-dokuwiki
@@ -35,7 +35,6 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; TODO
-;; * Rename *emacs-dokuwiki-xml-rpc-url* without the asterisks
 ;; * Only ask for the URL if the emacs-dokuwiki-xml-rpc-url variable is not set
 ;; * Make a variable that would hold the username
 ;; * Remove emacs-dokuwiki-setup, just use emacs-dokuwiki-login as the entry point
@@ -44,14 +43,14 @@
 
 (require 'xml-rpc)
 
-(defvar *emacs-dokuwiki-xml-rpc-url* "")
+(defvar emacs-dokuwiki-xml-rpc-url "")
 
 (defun emacs-dokuwiki-setup()
   "Initial set up for the dokuwiki"
   (interactive)
   (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
     (message "Emacs-dokuwiki: Saved the wiki url \"%s\"." xml-rpc-url)
-    (setq *emacs-dokuwiki-xml-rpc-url* xml-rpc-url)))
+    (setq emacs-dokuwiki-xml-rpc-url xml-rpc-url)))
 
 (defun emacs-dokuwiki-open-page()
   "Opens a page from the wiki.
@@ -61,11 +60,11 @@ To open a page in a particular namespace add the namespace name before the page-
 If the specified page does not exist, it creates a new page once the buffer is saved.
 "
   (interactive)
-  (if (equal *emacs-dokuwiki-xml-rpc-url* "")
+  (if (equal emacs-dokuwiki-xml-rpc-url "")
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let ((page-name (read-string "Enter page name: ")))
       (message "emacs-dokuwiki: page name is \"%s\"" page-name)
-      (let ((page-content (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.getPage page-name)))
+      (let ((page-content (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
 	(if (equal page-content nil)
 	    (message "Emacs-dokuwiki: Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
 	  (message "Emacs-dokuwiki: Page exists. Creating buffer for existing page \"%s\"" page-name))
@@ -88,7 +87,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 	    (message "Emacs-dokuwiki: Saving the page \"%s\"" page-name)
 	    (let* ((summary (read-string "Summary:"))
 		   (minor (y-or-n-p "Is this a minor change? "))
-		   (save-success (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
+		   (save-success (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
 	      (if (eq save-success t)
 		  (message "Emacs-dokuwiki: Saving successful with summary %s and minor of %s." summary minor)
 		(error "Emacs-dokuwiki: Saving unsuccessful!"))))
@@ -99,19 +98,19 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 (defun emacs-dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
   (interactive)
-  (if (equal *emacs-dokuwiki-xml-rpc-url* "")
+  (if (equal emacs-dokuwiki-xml-rpc-url "")
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
-    (let ((dokuwiki-title (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'dokuwiki.getTitle)))
+    (let ((dokuwiki-title (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "Emacs-dokuwiki: The title of the wiki is \"%s\"" dokuwiki-title))))
 
 (defun emacs-dokuwiki-login()
   "Connects to the dokuwiki"
   (interactive)
-  (if (equal *emacs-dokuwiki-xml-rpc-url* "")
+  (if (equal emacs-dokuwiki-xml-rpc-url "")
       (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
     (let* ((login-name (read-string "Enter login name: "))
 	   (login-password (read-passwd "Enter password: ")))
-      (if (eq (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'dokuwiki.login login-name login-password) t)
+      (if (eq (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.login login-name login-password) t)
 	  (message "Emacs-dokuwiki: Login successful!")
 	(error "Emacs-dokuwiki: Warning! Login unsuccessful!")))))
 
