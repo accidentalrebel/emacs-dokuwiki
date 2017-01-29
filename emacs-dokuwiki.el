@@ -1,6 +1,38 @@
 ;;; emacs-dokuwiki.el --- Edit DokuWiki Pages using Dokuwiki's XML-RPC API
 
+;; Copyright (C) 2017 Juan Karlo Lidudine
+
+;; Author: Juan Karlo Licudine <accidentalrebel@gmail.com>
+;; URL: http://www.github.com/accidentalrebel/emacs-dokuwiki
+;; Version: 0.0.3
+;; Keywords: convenience
+;; Package-Requires: ((emacs "24.3") (xml-rpc "1.6.8"))
+
+;; This file is not part of GNU Emacs.
+
 ;;; Commentary:
+
+;; Provides a way to edit a Dokuwiki wiki on Emacs.  Uses Dokuwiki's XML-RPC API.
+
+;; Usage:
+;; (require 'emacs-dokuwiki) ;; unless installed as a package
+
+;;; License:
+
+;; This program is free software; you can redistributfe it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 3
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
 
 ;;; TODO
 ;; * Rename *emacs-dokuwiki-xml-rpc-url* without the asterisks
@@ -55,7 +87,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 	  (progn
 	    (message "Emacs-dokuwiki: Saving the page \"%s\"" page-name)
 	    (let* ((summary (read-string "Summary:"))
-		   (minor (y-or-n-p "Is this a minor change?"))
+		   (minor (y-or-n-p "Is this a minor change? "))
 		   (save-success (xml-rpc-method-call *emacs-dokuwiki-xml-rpc-url* 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
 	      (if (eq save-success t)
 		  (message "Emacs-dokuwiki: Saving successful with summary %s and minor of %s." summary minor)
