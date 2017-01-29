@@ -4,7 +4,7 @@
 
 ;; Author: Juan Karlo Licudine <accidentalrebel@gmail.com>
 ;; URL: http://www.github.com/accidentalrebel/emacs-dokuwiki
-;; Version: 0.0.3
+;; Version: 1.0.0
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "24.3") (xml-rpc "1.6.8"))
 
@@ -33,11 +33,6 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to the
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
-
-;;; TODO
-;; * Use auth-source in storing login credentials
-;; * Create a function that displays a list of available pages
-;; * Should be able to open a page even if a full url is entered
 
 ;;; Code:
 
