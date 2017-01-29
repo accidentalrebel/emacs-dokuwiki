@@ -1,4 +1,4 @@
-# emacs-dokuwik
+# emacs-dokuwiki
 Edit remote Dokuwiki pages using XML-RPC
 
 # Overview #
