@@ -51,7 +51,7 @@
   (let ((xml-rpc-url (dokuwiki--get-xml-rpc-url))
 	(login-user-name (dokuwiki--get-login-user-name))
 	(login-password (read-passwd "Enter password: ")))
-    (if (eq (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password) t)
+    (if (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password)
 	(message "Login successful!")
       (error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!"))))
 
@@ -62,18 +62,18 @@ To open a page in a particular namespace add the namespace name before the page-
 
 If the specified page does not exist, it creates a new page once the buffer is saved."
   (interactive)
-  (if (equal dokuwiki-xml-rpc-url nil)
-      (user-error "Call dokuwiki-setup() first")
+  (if (not dokuwiki-xml-rpc-url)
+      (user-error "Call dokuwiki-login() first")
     (let ((page-name (read-string "Enter page name: ")))
       (message "page name is \"%s\"" page-name)
       (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
-	(if (equal page-content nil)
+	(if (not page-content)
 	    (message "Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
 	  (message "Page exists. Creating buffer for existing page \"%s\"" page-name))
 	(get-buffer-create (concat page-name ".dwiki"))
 	(switch-to-buffer (concat page-name ".dwiki"))
 	(erase-buffer)
-	(when (not (eq page-content nil))
+	(when page-content
 	    (insert page-content))))))
 
 (defun dokuwiki-save-page()
@@ -81,7 +81,7 @@ If the specified page does not exist, it creates a new page once the buffer is s
 
 Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved as \"wikiurl.com/wiki-page\". On the other hand, a buffer of \"namespace:wiki-page.dwiki\" is saved as \"wikiurl.com/namespace:wiki-page\""
   (interactive)
-  (if (eq (string-match-p ".dwiki" (buffer-name)) nil)
+  (if (not (string-match-p ".dwiki" (buffer-name)))
       (error "The current buffer is not a .dwiki buffer")
     (let ((page-name (replace-regexp-in-string ".dwiki" "" (buffer-name))))
       (if (y-or-n-p (concat "Do you want to save the page \"" page-name "\"?"))
@@ -90,7 +90,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 	    (let* ((summary (read-string "Summary:"))
 		   (minor (y-or-n-p "Is this a minor change? "))
 		   (save-success (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
-	      (if (eq save-success t)
+	      (if save-success
 		  (message "Saving successful with summary %s and minor of %s." summary minor)
 		(error "Saving unsuccessful!"))))
 	(message "Cancelled saving of the page.")))))
@@ -98,15 +98,15 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 (defun dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
   (interactive)
-  (if (equal dokuwiki-xml-rpc-url nil)
-      (user-error "Call dokuwiki-setup() first")
+  (if (not dokuwiki-xml-rpc-url)
+      (user-error "Call dokuwiki-login() first")
     (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url()
   "Gets the xml-rpc to be used for logging in."
-  (if (not (equal dokuwiki-xml-rpc-url nil))
+  (if dokuwiki-xml-rpc-url
       dokuwiki-xml-rpc-url
     (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
       (message "The entered wiki url is \"%s\"." xml-rpc-url)
@@ -114,7 +114,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 
 (defun dokuwiki--get-login-user-name()
   "Gets the login user name to be used for logging in."
-  (if (not (equal dokuwiki-login-user-name nil))
+  (if dokuwiki-login-user-name
       dokuwiki-login-user-name
     (let ((login-name (read-string "Enter login user name: ")))
       (message "The entered login user name is \"%s\"." login-name)
