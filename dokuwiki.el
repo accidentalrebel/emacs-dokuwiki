@@ -1,4 +1,4 @@
-;;; emacs-dokuwiki.el --- Edit Remote DokuWiki Pages Using XML-RPC
+;;; dokuwiki.el --- Edit Remote DokuWiki Pages Using XML-RPC
 
 ;; Copyright (C) 2017 Juan Karlo Licudine
 
@@ -15,7 +15,7 @@
 ;; Provides a way to edit a remote Dokuwiki wiki on Emacs.  Uses Dokuwiki's XML-RPC API.
 
 ;; Usage:
-;; (require 'emacs-dokuwiki) ;; unless installed as a package
+;; (require 'dokuwiki) ;; unless installed as a package
 
 ;;; License:
 
@@ -38,86 +38,86 @@
 
 (require 'xml-rpc)
 
-(defvar emacs-dokuwiki-xml-rpc-url nil
+(defvar dokuwiki-xml-rpc-url nil
   "The url pointing to the \"xmlrpc.php\" file in the wiki to be accessed.")
 
-(defvar emacs-dokuwiki-login-user-name nil
+(defvar dokuwiki-login-user-name nil
   "The user name to use when logging in to the wiki.")
 
-(defun emacs-dokuwiki-login()
+(defun dokuwiki-login()
   "Connects to the dokuwiki"
   (interactive)
-  (let ((xml-rpc-url (emacs-dokuwiki--get-xml-rpc-url))
-	(login-user-name (emacs-dokuwiki--get-login-user-name))
+  (let ((xml-rpc-url (dokuwiki--get-xml-rpc-url))
+	(login-user-name (dokuwiki--get-login-user-name))
 	(login-password (read-passwd "Enter password: ")))
     (if (eq (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password) t)
-	(message "Emacs-dokuwiki: Login successful!")
-      (error "Emacs-dokuwiki: Login unsuccessful! Check if your emacs-dokuwiki-xml-rpc-url or login credentials are correct!"))))
+	(message "Login successful!")
+      (error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!"))))
 
-(defun emacs-dokuwiki-open-page()
+(defun dokuwiki-open-page()
   "Opens a page from the wiki.
 
 To open a page in a particular namespace add the namespace name before the page-name. For example, \"namespace:wiki-page\" to open the \"wiki-page\" page inside the \"namespace\" namespace.
 
 If the specified page does not exist, it creates a new page once the buffer is saved."
   (interactive)
-  (if (equal emacs-dokuwiki-xml-rpc-url nil)
-      (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
+  (if (equal dokuwiki-xml-rpc-url nil)
+      (user-error "Call dokuwiki-setup() first")
     (let ((page-name (read-string "Enter page name: ")))
-      (message "emacs-dokuwiki: page name is \"%s\"" page-name)
-      (let ((page-content (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
+      (message "page name is \"%s\"" page-name)
+      (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
 	(if (equal page-content nil)
-	    (message "Emacs-dokuwiki: Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
-	  (message "Emacs-dokuwiki: Page exists. Creating buffer for existing page \"%s\"" page-name))
+	    (message "Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
+	  (message "Page exists. Creating buffer for existing page \"%s\"" page-name))
 	(get-buffer-create (concat page-name ".dwiki"))
 	(switch-to-buffer (concat page-name ".dwiki"))
 	(erase-buffer)
 	(when (not (eq page-content nil))
 	    (insert page-content))))))
 
-(defun emacs-dokuwiki-save-page()
+(defun dokuwiki-save-page()
   "Saves the current buffer as a page in the wiki.
 
 Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved as \"wikiurl.com/wiki-page\". On the other hand, a buffer of \"namespace:wiki-page.dwiki\" is saved as \"wikiurl.com/namespace:wiki-page\""
   (interactive)
   (if (eq (string-match-p ".dwiki" (buffer-name)) nil)
-      (error "Emacs-dokuwiki: The current buffer is not a .dwiki buffer")
+      (error "The current buffer is not a .dwiki buffer")
     (let ((page-name (replace-regexp-in-string ".dwiki" "" (buffer-name))))
       (if (y-or-n-p (concat "Do you want to save the page \"" page-name "\"?"))
 	  (progn
-	    (message "Emacs-dokuwiki: Saving the page \"%s\"" page-name)
+	    (message "Saving the page \"%s\"" page-name)
 	    (let* ((summary (read-string "Summary:"))
 		   (minor (y-or-n-p "Is this a minor change? "))
-		   (save-success (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
+		   (save-success (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
 	      (if (eq save-success t)
-		  (message "Emacs-dokuwiki: Saving successful with summary %s and minor of %s." summary minor)
-		(error "Emacs-dokuwiki: Saving unsuccessful!"))))
-	(message "Emacs-dokuwiki: Cancelled saving of the page.")))))
+		  (message "Saving successful with summary %s and minor of %s." summary minor)
+		(error "Saving unsuccessful!"))))
+	(message "Cancelled saving of the page.")))))
 
-(defun emacs-dokuwiki-get-wiki-title()
+(defun dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
   (interactive)
-  (if (equal emacs-dokuwiki-xml-rpc-url nil)
-      (user-error "Emacs-dokuwiki: Call emacs-dokuwiki-setup() first")
-    (let ((dokuwiki-title (xml-rpc-method-call emacs-dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
-      (message "Emacs-dokuwiki: The title of the wiki is \"%s\"" dokuwiki-title))))
+  (if (equal dokuwiki-xml-rpc-url nil)
+      (user-error "Call dokuwiki-setup() first")
+    (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
+      (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
 ;; Helpers
-(defun emacs-dokuwiki--get-xml-rpc-url()
+(defun dokuwiki--get-xml-rpc-url()
   "Gets the xml-rpc to be used for logging in."
-  (if (not (equal emacs-dokuwiki-xml-rpc-url nil))
-      emacs-dokuwiki-xml-rpc-url
+  (if (not (equal dokuwiki-xml-rpc-url nil))
+      dokuwiki-xml-rpc-url
     (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
-      (message "Emacs-dokuwiki: The entered wiki url is \"%s\"." xml-rpc-url)
+      (message "The entered wiki url is \"%s\"." xml-rpc-url)
       xml-rpc-url)))
 
-(defun emacs-dokuwiki--get-login-user-name()
+(defun dokuwiki--get-login-user-name()
   "Gets the login user name to be used for logging in."
-  (if (not (equal emacs-dokuwiki-login-user-name nil))
-      emacs-dokuwiki-login-user-name
+  (if (not (equal dokuwiki-login-user-name nil))
+      dokuwiki-login-user-name
     (let ((login-name (read-string "Enter login user name: ")))
-      (message "Emacs-dokuwiki: The entered login user name is \"%s\"." login-name)
+      (message "The entered login user name is \"%s\"." login-name)
       login-name)))
 
-(provide 'emacs-dokuwiki)
-;;; emacs-dokuwiki.el ends here
+(provide 'dokuwiki)
+;;; dokuwiki.el ends here
