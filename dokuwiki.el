@@ -44,6 +44,7 @@
 (defvar dokuwiki-login-user-name nil
   "The user name to use when logging in to the wiki.")
 
+;;;###autoload
 (defun dokuwiki-login()
   "Connects to the dokuwiki"
   (interactive)
