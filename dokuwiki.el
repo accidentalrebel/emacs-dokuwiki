@@ -92,15 +92,14 @@ If the specified page does not exist, it creates a new page once the buffer is s
 
 Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved as \"wikiurl.com/wiki-page\". On the other hand, a buffer of \"namespace:wiki-page.dwiki\" is saved as \"wikiurl.com/namespace:wiki-page\""
   (interactive)
-  (if (not (string-match-p ".dwiki" (buffer-name)))
-      (error "The current buffer is not a .dwiki buffer")
-    (if (not dokuwiki--has-successfully-logged-in)
-	(user-error "Login first before saving a page")
+  (if (not dokuwiki--has-successfully-logged-in)
+      (user-error "Login first before saving a page")
+    (if (not (string-match-p ".dwiki" (buffer-name)))
+	(error "The current buffer is not a .dwiki buffer")
       (let ((page-name (replace-regexp-in-string ".dwiki" "" (buffer-name))))
 	(if (not (y-or-n-p (concat "Do you want to save the page \"" page-name "\"?")))
 	    (message "Cancelled saving of the page."))
-	 (message "Saving the page \"%s\"" page-name)
-	 (let* ((summary (read-string "Summary:"))
+	 (let* ((summary (read-string "Summary: "))
 		(minor (y-or-n-p "Is this a minor change? "))
 		(save-success (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
 	   (if save-success
@@ -118,7 +117,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url()
   "Gets the xml-rpc to be used for logging in."
-  (if dokuwiki-xml-rpc-url
+  (if (not (string= dokuwiki-xml-rpc-url ""))
       dokuwiki-xml-rpc-url
     (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
       (message "The entered wiki url is \"%s\"." xml-rpc-url)
@@ -126,7 +125,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 
 (defun dokuwiki--get-login-user-name()
   "Gets the login user name to be used for logging in."
-  (if dokuwiki-login-user-name
+  (if (not (string= dokuwiki-login-user-name ""))
       dokuwiki-login-user-name
     (let ((login-name (read-string "Enter login user name: ")))
       (message "The entered login user name is \"%s\"." login-name)
