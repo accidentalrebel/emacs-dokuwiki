@@ -38,11 +38,19 @@
 
 (require 'xml-rpc)
 
-(defvar dokuwiki-xml-rpc-url nil
-  "The url pointing to the \"xmlrpc.php\" file in the wiki to be accessed.")
+(defgroup dokuwiki nil
+  "Edit remote Dokuwiki pages using XML-RPC"
+  :group 'dokuwiki)
 
-(defvar dokuwiki-login-user-name nil
-  "The user name to use when logging in to the wiki.")
+(defcustom dokuwiki-xml-rpc-url ""
+  "The url pointing to the \"xmlrpc.php\" file in the wiki to be accessed."
+  :group 'dokuwiki
+  :type 'string)
+
+(defcustom dokuwiki-login-user-name ""
+  "The user name to use when logging in to the wiki."
+  :group 'dokuwiki
+  :type 'string)
 
 ;;;###autoload
 (defun dokuwiki-login()
@@ -62,7 +70,7 @@ To open a page in a particular namespace add the namespace name before the page-
 
 If the specified page does not exist, it creates a new page once the buffer is saved."
   (interactive "sEnter page name: ")
-  (if (not dokuwiki-xml-rpc-url)
+  (if (string= dokuwiki-xml-rpc-url "")
       (user-error "Login first before opening a page")
     (message "page name is \"%s\"" page-name)
     (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
@@ -97,7 +105,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 (defun dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
   (interactive)
-  (if (not dokuwiki-xml-rpc-url)
+  (if (string= dokuwiki-xml-rpc-url "")
       (user-error "Call dokuwiki-login() first")
     (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
@@ -105,7 +113,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url()
   "Gets the xml-rpc to be used for logging in."
-  (if dokuwiki-xml-rpc-url
+  (if (not (string= dokuwiki-xml-rpc-url ""))
       dokuwiki-xml-rpc-url
     (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
       (message "The entered wiki url is \"%s\"." xml-rpc-url)
@@ -113,7 +121,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 
 (defun dokuwiki--get-login-user-name()
   "Gets the login user name to be used for logging in."
-  (if dokuwiki-login-user-name
+  (if (not (string= dokuwiki-login-user-name ""))
       dokuwiki-login-user-name
     (let ((login-name (read-string "Enter login user name: ")))
       (message "The entered login user name is \"%s\"." login-name)
