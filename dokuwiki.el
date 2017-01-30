@@ -55,26 +55,25 @@
 	(message "Login successful!")
       (error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!"))))
 
-(defun dokuwiki-open-page()
+(defun dokuwiki-open-page(page-name)
   "Opens a page from the wiki.
 
 To open a page in a particular namespace add the namespace name before the page-name. For example, \"namespace:wiki-page\" to open the \"wiki-page\" page inside the \"namespace\" namespace.
 
 If the specified page does not exist, it creates a new page once the buffer is saved."
-  (interactive)
+  (interactive "sEnter page name: ")
   (if (not dokuwiki-xml-rpc-url)
-      (user-error "Call dokuwiki-login() first")
-    (let ((page-name (read-string "Enter page name: ")))
-      (message "page name is \"%s\"" page-name)
-      (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
-	(if (not page-content)
-	    (message "Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
-	  (message "Page exists. Creating buffer for existing page \"%s\"" page-name))
-	(get-buffer-create (concat page-name ".dwiki"))
-	(switch-to-buffer (concat page-name ".dwiki"))
-	(erase-buffer)
-	(when page-content
-	    (insert page-content))))))
+      (user-error "Login first before opening a page")
+    (message "page name is \"%s\"" page-name)
+    (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
+      (if (not page-content)
+	  (message "Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
+	(message "Page exists. Creating buffer for existing page \"%s\"" page-name))
+      (get-buffer-create (concat page-name ".dwiki"))
+      (switch-to-buffer (concat page-name ".dwiki"))
+      (erase-buffer)
+      (when page-content
+	(insert page-content)))))
 
 (defun dokuwiki-save-page()
   "Saves the current buffer as a page in the wiki.
