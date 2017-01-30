@@ -28,7 +28,7 @@ require 'dokuwiki
 The first thing to do is to login using the `dokuwiki-login` function. Once successfully logged in the user can now be able to use the other available functions.
 
 **Note**
-To avoid entering the *xml-rpc-url* and the *login-user-name* everytime you login consider setting the `dokuwiki-xml-rpc-url` and `dokuwiki-login-user-name` variables on Emacs startup as seen below.
+To avoid entering the *xml-rpc-url* and the *login-user-name* everytime you login consider setting the `dokuwiki-xml-rpc-url` and `dokuwiki-login-user-name` variables through the [Emacs customization interface](https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html) or by adding the code below when Emacs starts:
 
 ``` emacs-lisp
 (setq dokuwiki-xml-rpc-url "http://www.url-of-wiki.com/lib/exe/xmlrpc.php")
