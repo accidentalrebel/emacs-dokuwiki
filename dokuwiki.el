@@ -52,6 +52,9 @@
   :group 'dokuwiki
   :type 'string)
 
+(defvar dokuwiki--has-successfully-logged-in nil
+  "A variable that is set to true once successfully logged in to a wiki.")
+
 ;;;###autoload
 (defun dokuwiki-login()
   "Connects to the dokuwiki"
@@ -59,9 +62,10 @@
   (let ((xml-rpc-url (dokuwiki--get-xml-rpc-url))
 	(login-user-name (dokuwiki--get-login-user-name))
 	(login-password (read-passwd "Enter password: ")))
-    (if (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password)
-	(message "Login successful!")
-      (error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!"))))
+    (if (not (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password))
+	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
+      (message "Login successful!")
+      (setq dokuwiki--has-successfully-logged-in t))))
 
 (defun dokuwiki-open-page(page-name)
   "Opens a page from the wiki.
@@ -70,7 +74,7 @@ To open a page in a particular namespace add the namespace name before the page-
 
 If the specified page does not exist, it creates a new page once the buffer is saved."
   (interactive "sEnter page name: ")
-  (if (string= dokuwiki-xml-rpc-url "")
+  (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before opening a page")
     (message "page name is \"%s\"" page-name)
     (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
@@ -90,30 +94,31 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
   (interactive)
   (if (not (string-match-p ".dwiki" (buffer-name)))
       (error "The current buffer is not a .dwiki buffer")
-    (let ((page-name (replace-regexp-in-string ".dwiki" "" (buffer-name))))
-      (if (y-or-n-p (concat "Do you want to save the page \"" page-name "\"?"))
-	  (progn
-	    (message "Saving the page \"%s\"" page-name)
-	    (let* ((summary (read-string "Summary:"))
-		   (minor (y-or-n-p "Is this a minor change? "))
-		   (save-success (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
-	      (if save-success
-		  (message "Saving successful with summary %s and minor of %s." summary minor)
-		(error "Saving unsuccessful!"))))
-	(message "Cancelled saving of the page.")))))
+    (if (not dokuwiki--has-successfully-logged-in)
+	(user-error "Login first before saving a page")
+      (let ((page-name (replace-regexp-in-string ".dwiki" "" (buffer-name))))
+	(if (not (y-or-n-p (concat "Do you want to save the page \"" page-name "\"?")))
+	    (message "Cancelled saving of the page."))
+	 (message "Saving the page \"%s\"" page-name)
+	 (let* ((summary (read-string "Summary:"))
+		(minor (y-or-n-p "Is this a minor change? "))
+		(save-success (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.putPage page-name (buffer-string) `(("sum" . ,summary) ("minor" . ,minor)))))
+	   (if save-success
+	       (message "Saving successful with summary %s and minor of %s." summary minor)
+	     (error "Saving unsuccessful!")))))))
 
 (defun dokuwiki-get-wiki-title()
   "Gets the title of the current wiki"
   (interactive)
-  (if (string= dokuwiki-xml-rpc-url "")
-      (user-error "Call dokuwiki-login() first")
+  (if (not dokuwiki--has-successfully-logged-in)
+      (user-error "Login first before getting the wiki title")
     (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url()
   "Gets the xml-rpc to be used for logging in."
-  (if (not (string= dokuwiki-xml-rpc-url ""))
+  (if dokuwiki-xml-rpc-url
       dokuwiki-xml-rpc-url
     (let ((xml-rpc-url (read-string "Enter wiki URL: ")))
       (message "The entered wiki url is \"%s\"." xml-rpc-url)
@@ -121,7 +126,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 
 (defun dokuwiki--get-login-user-name()
   "Gets the login user name to be used for logging in."
-  (if (not (string= dokuwiki-login-user-name ""))
+  (if dokuwiki-login-user-name
       dokuwiki-login-user-name
     (let ((login-name (read-string "Enter login user name: ")))
       (message "The entered login user name is \"%s\"." login-name)
