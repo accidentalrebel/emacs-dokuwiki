@@ -58,4 +58,3 @@ Contributions are always welcome. Feel free to submit a pull request, create an 
 # To Do #
   * Use auth-source in storing login credentials
   * Create a function that displays a list of available pages
-  * Should be able to open a page even if a full url is entered
