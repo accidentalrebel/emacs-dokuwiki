@@ -67,8 +67,10 @@
       (message "Login successful!")
       (setq dokuwiki--has-successfully-logged-in t))))
 
-(defun dokuwiki-open-page(page-name)
+(defun dokuwiki-open-page(page-name-or-url)
   "Opens a page from the wiki.
+
+Can accept a full URL or just the page name.
 
 To open a page in a particular namespace add the namespace name before the page-name. For example, \"namespace:wiki-page\" to open the \"wiki-page\" page inside the \"namespace\" namespace.
 
@@ -76,8 +78,9 @@ If the specified page does not exist, it creates a new page once the buffer is s
   (interactive "sEnter page name: ")
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before opening a page")
-    (message "page name is \"%s\"" page-name)
-    (let ((page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
+    (let* ((page-name (car (last (split-string page-name-or-url "/"))))
+	  (page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
+      (message "Page name is \"%s\"" page-name)
       (if (not page-content)
 	  (message "Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
 	(message "Page exists. Creating buffer for existing page \"%s\"" page-name))

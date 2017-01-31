@@ -7,7 +7,7 @@ Edit remote Dokuwiki pages using XML-RPC
 Package is still under development. Currently, the package can edit, create, and save pages. Will be adding more convenience functions to make the process easier in the near future.
 
 # Installation #
-Download **Dokuwiki for Emacs ** from Github.
+Download **Dokuwiki for Emacs** from Github.
 
 ``` emacs-lisp
 git clone https://github.com/accidentalrebel/emacs-dokuwiki.git
@@ -37,6 +37,8 @@ To avoid entering the *xml-rpc-url* and the *login-user-name* everytime you logi
 
 ## Opening a page ##
 The function `dokuwiki-open-page` will download the contents of the wiki page specified by the user. If the specified page does not exist then the page is created on the remote wiki once the page is saved.
+
+Can accept a full url like *wikiurl.com/wiki-page* or just *wiki-page*.
 
 **Note**
 To open a page in a particular namespace add the namespace name before the page-name. For example, *namespace:wiki-page* to open the *wiki-page* page inside the *namespace* namespace.
