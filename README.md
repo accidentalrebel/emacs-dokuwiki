@@ -56,5 +56,6 @@ This function is intended to be called on a buffer created after opening a page.
 Contributions are always welcome. Feel free to submit a pull request, create an issue, or send suggestions.
 
 # To Do #
-  * Use auth-source in storing login credentials
-  * Create a function that displays a list of available pages
+  - [ ] Use auth-source in storing login credentials
+  - [ ] Create a function that displays a list of available pages
+  - [ ] Ability to preview changes
