@@ -127,7 +127,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
       (get-buffer-create (concat wiki-title " Page List"))
       (switch-to-buffer (concat wiki-title " Page List"))
       (dolist (namespaces page-list)
-	(insert (concat (cdr (car namespaces))"\n"))
+	(insert (concat (cdr (assoc "id" namespaces))"\n"))
 	)
       )
   ))
