@@ -117,6 +117,21 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
     (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
+(defun dokuwiki-list-pages()
+  "Lists the pages available for the current wiki."
+  (interactive)
+  (if (not dokuwiki--has-successfully-logged-in)
+      (user-error "Login first before listing the pages")
+    (let ((page-list (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getAllPages))
+	  (wiki-title (dokuwiki-get-wiki-title)))
+      (get-buffer-create (concat wiki-title " Page List"))
+      (switch-to-buffer (concat wiki-title " Page List"))
+      (dolist (namespaces page-list)
+	(insert (concat (cdr (car namespaces))"\n"))
+	)
+      )
+  ))
+
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url()
   "Gets the xml-rpc to be used for logging in."
