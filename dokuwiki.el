@@ -127,15 +127,14 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
   (interactive)
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before listing the pages")
-    (let ((page-list (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getAllPages))
-	  (wiki-title (dokuwiki-get-wiki-title)))
-      (get-buffer-create (concat wiki-title " Page List"))
-      (switch-to-buffer (concat wiki-title " Page List"))
-      (dolist (namespaces page-list)
-	(insert (concat (cdr (assoc "id" namespaces))"\n"))
+    (let ((page-detail-list (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getAllPages))
+	  (wiki-title (dokuwiki-get-wiki-title))
+	  (page-list ()))
+      (dolist (page-detail page-detail-list)
+	(push (cdr (assoc "id" page-detail)) page-list)
 	)
-      )
-  ))
+      (completing-read "Pages: " (with-temp-buffer
+				   page-list)))))
 
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url ()
@@ -153,6 +152,7 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
     (let ((login-name (read-string "Enter login user name: ")))
       (message "The entered login user name is \"%s\"." login-name)
       login-name)))
+
 
 (provide 'dokuwiki)
 ;;; dokuwiki.el ends here
