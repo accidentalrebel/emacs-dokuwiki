@@ -1,4 +1,6 @@
 # Dokuwiki for Emacs
+[![MELPA](https://melpa.org/packages/dokuwiki-badge.svg)](https://melpa.org/#/dokuwiki)
+
 Edit remote Dokuwiki pages using XML-RPC
  
 # Overview #
