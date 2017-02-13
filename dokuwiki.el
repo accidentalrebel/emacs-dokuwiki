@@ -123,7 +123,7 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
 (defun dokuwiki-list-pages ()
-  "Lists the pages available for the current wiki."
+  "Show a selectable list containing pages from the current wiki."
   (interactive)
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before listing the pages")
@@ -133,8 +133,7 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
       (dolist (page-detail page-detail-list)
 	(push (cdr (assoc "id" page-detail)) page-list)
 	)
-      (completing-read "Pages: " (with-temp-buffer
-				   page-list)))))
+      (dokuwiki-open-page (completing-read "Select a page to open: " page-list)))))
 
 ;; Helpers
 (defun dokuwiki--get-xml-rpc-url ()
