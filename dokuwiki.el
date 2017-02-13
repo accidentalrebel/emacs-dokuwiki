@@ -56,8 +56,8 @@
   "A variable that is set to true once successfully logged in to a wiki.")
 
 ;;;###autoload
-(defun dokuwiki-login()
-  "Connects to the dokuwiki"
+(defun dokuwiki-login ()
+  "Connects to the dokuwiki."
   (interactive)
   (let ((xml-rpc-url (dokuwiki--get-xml-rpc-url))
 	(login-user-name (dokuwiki--get-login-user-name))
@@ -67,14 +67,17 @@
       (message "Login successful!")
       (setq dokuwiki--has-successfully-logged-in t))))
 
-(defun dokuwiki-open-page(page-name-or-url)
+(defun dokuwiki-open-page (page-name-or-url)
   "Opens a page from the wiki.
 
-Can accept a full URL or just the page name.
+PAGE-NAME-OR-URL: The page id or url to open.
 
-To open a page in a particular namespace add the namespace name before the page-name. For example, \"namespace:wiki-page\" to open the \"wiki-page\" page inside the \"namespace\" namespace.
+To open a page in a particular namespace add the namespace name before
+the page-name.  For example, \"namespace:wiki-page\" to open the
+\"wiki-page\" page inside the \"namespace\" namespace.
 
-If the specified page does not exist, it creates a new page once the buffer is saved."
+If the specified page does not exist, it creates a new page once the
+buffer is saved."
   (interactive "sEnter page name: ")
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before opening a page")
@@ -90,10 +93,12 @@ If the specified page does not exist, it creates a new page once the buffer is s
       (when page-content
 	(insert page-content)))))
 
-(defun dokuwiki-save-page()
-  "Saves the current buffer as a page in the wiki.
+(defun dokuwiki-save-page ()
+  "Save the current buffer as a page in the wiki.
 
-Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved as \"wikiurl.com/wiki-page\". On the other hand, a buffer of \"namespace:wiki-page.dwiki\" is saved as \"wikiurl.com/namespace:wiki-page\""
+Uses the buffer name as the page name.  A buffer of \"wiki-page.dwiki\"
+is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
+\"namespace:wiki-page.dwiki\" is saved as \"wikiurl.com/namespace:wiki-page\""
   (interactive)
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before saving a page")
@@ -109,15 +114,15 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
 	       (message "Saving successful with summary %s and minor of %s." summary minor)
 	     (error "Saving unsuccessful!")))))))
 
-(defun dokuwiki-get-wiki-title()
-  "Gets the title of the current wiki"
+(defun dokuwiki-get-wiki-title ()
+  "Gets the title of the current wiki."
   (interactive)
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before getting the wiki title")
     (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
-(defun dokuwiki-list-pages()
+(defun dokuwiki-list-pages ()
   "Lists the pages available for the current wiki."
   (interactive)
   (if (not dokuwiki--has-successfully-logged-in)
@@ -133,7 +138,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
   ))
 
 ;; Helpers
-(defun dokuwiki--get-xml-rpc-url()
+(defun dokuwiki--get-xml-rpc-url ()
   "Gets the xml-rpc to be used for logging in."
   (if (not (string= dokuwiki-xml-rpc-url ""))
       dokuwiki-xml-rpc-url
@@ -141,7 +146,7 @@ Uses the buffer name as the page name. A buffer of \"wiki-page.dwiki\" is saved 
       (message "The entered wiki url is \"%s\"." xml-rpc-url)
       xml-rpc-url)))
 
-(defun dokuwiki--get-login-user-name()
+(defun dokuwiki--get-login-user-name ()
   "Gets the login user name to be used for logging in."
   (if (not (string= dokuwiki-login-user-name ""))
       dokuwiki-login-user-name
