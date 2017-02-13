@@ -36,7 +36,9 @@ To avoid entering the *xml-rpc-url* and the *login-user-name* everytime you logi
 ```
 
 ## Opening a page ##
-The function `dokuwiki-open-page` will download the contents of the wiki page specified by the user. If the specified page does not exist then the page is created on the remote wiki once the page is saved.
+Use the function `dokuwiki-list-pages` to list the wiki pages available. Selecting any element in the list opens it up in a new buffer.
+
+Alternatively, the function `dokuwiki-open-page` will download the contents of the wiki page specified by the user. If the specified page does not exist then the page is created on the remote wiki once the page is saved.
 
 Can accept a full url like *wikiurl.com/wiki-page* or just *wiki-page*.
 
@@ -50,11 +52,11 @@ The function `dokuwiki-save-page` will save the contents of the current *.dwiki*
 This function is intended to be called on a buffer created after opening a page. This will still work on any buffer as long as the buffer has a *.dwiki* at the end of it's buffer name.
 
 # Miscellaneous #
-  * After opening a page consider using the [dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) or [dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) for easy editing of the buffers.
-  
+  * After opening a page consider using the [emac-dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) or [dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) for easy editing of the buffers.
+
 # Contributing #
 Contributions are always welcome. Feel free to submit a pull request, create an issue, or send suggestions.
 
 # To Do #
   * Use auth-source in storing login credentials
-  * Create a function that displays a list of available pages
+  * Add ability to preview page changes
