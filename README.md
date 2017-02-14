@@ -52,7 +52,7 @@ The function `dokuwiki-save-page` will save the contents of the current *.dwiki*
 This function is intended to be called on a buffer created after opening a page. This will still work on any buffer as long as the buffer has a *.dwiki* at the end of it's buffer name.
 
 # Miscellaneous #
-  * After opening a page consider using the [emac-dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) or [dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) for easy editing of the buffers.
+  * After opening a page consider using the [emacs-dokuwiki-mode](https://github.com/kai2nenobu/emacs-dokuwiki-mode) or [dokuwiki-mode.el](https://github.com/larsjsol/dokuwiki-mode.el) for easy editing of the buffers.
 
 # Contributing #
 Contributions are always welcome. Feel free to submit a pull request, create an issue, or send suggestions.
@@ -60,3 +60,4 @@ Contributions are always welcome. Feel free to submit a pull request, create an 
 # To Do #
   * Use auth-source in storing login credentials
   * Add ability to preview page changes
+  * Ask to open the page in a browser after saving
