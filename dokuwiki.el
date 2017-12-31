@@ -37,6 +37,7 @@
 ;;; Code:
 
 (require 'xml-rpc)
+(require 'auth-source)
 
 (defgroup dokuwiki nil
   "Edit remote Dokuwiki pages using XML-RPC"
@@ -59,9 +60,10 @@
 (defun dokuwiki-login ()
   "Connects to the dokuwiki."
   (interactive)
-  (let ((xml-rpc-url (dokuwiki--get-xml-rpc-url))
-	(login-user-name (dokuwiki--get-login-user-name))
-	(login-password (read-passwd "Enter password: ")))
+  (let* ((xml-rpc-url (dokuwiki--get-xml-rpc-url))
+         (credentials (dokuwiki--credentials))
+         (login-user-name (plist-get credentials :user))
+         (login-password (plist-get credentials :password)))
     (if (not (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password))
 	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
       (message "Login successful!")
@@ -136,6 +138,18 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
       (dokuwiki-open-page (completing-read "Select a page to open: " page-list)))))
 
 ;; Helpers
+(defun dokuwiki--credentials ()
+  "Read dokuwiki credentials either from auth source or from the user input."
+  (let ((auth-source-credentials (nth 0 (auth-source-search :max 1 :host (dokuwiki--get-xml-rpc-url) :require '(:user :secret)))))
+    (if auth-source-credentials
+        (let* ((user (plist-get auth-source-credentials :user))
+               (password-raw (plist-get auth-source-credentials :secret))
+               (password (if (functionp password-raw) (funcall password-raw) password-raw)))
+          (list :user user :password password))
+      (let ((user (dokuwiki--get-login-user-name))
+            (password (read-passwd "Enter password: ")))
+        (list :user user :password password)))))
+
 (defun dokuwiki--get-xml-rpc-url ()
   "Gets the xml-rpc to be used for logging in."
   (if (not (string= dokuwiki-xml-rpc-url ""))
