@@ -38,6 +38,7 @@
 
 (require 'xml-rpc)
 (require 'auth-source)
+(require 'dokuwiki-mode)
 
 (defgroup dokuwiki nil
   "Edit remote Dokuwiki pages using XML-RPC"
@@ -67,7 +68,9 @@
     (if (not (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password))
 	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
       (message "Login successful!")
-      (setq dokuwiki--has-successfully-logged-in t))))
+      (setq dokuwiki--has-successfully-logged-in t)
+      (dokuwiki-list-pages)
+)))
 
 (defun dokuwiki-open-page (page-name-or-url)
   "Opens a page from the wiki.
@@ -93,7 +96,11 @@ buffer is saved."
       (switch-to-buffer (concat page-name ".dwiki"))
       (erase-buffer)
       (when page-content
-	(insert page-content)))))
+	(progn (insert page-content)
+		(with-current-buffer (get-buffer (concat page-name ".dwiki")) (dokuwiki-mode))
+	)
+      )
+)))
 
 (defun dokuwiki-save-page ()
   "Save the current buffer as a page in the wiki.
@@ -124,18 +131,27 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
     (let ((dokuwiki-title (xml-rpc-method-call dokuwiki-xml-rpc-url 'dokuwiki.getTitle)))
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
-(defun dokuwiki-list-pages ()
-  "Show a selectable list containing pages from the current wiki."
-  (interactive)
+(defun dokuwiki-get-page-list ()
+  "Extract 'id' from page info"
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before listing the pages")
     (let ((page-detail-list (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getAllPages))
-	  (wiki-title (dokuwiki-get-wiki-title))
 	  (page-list ()))
-      (dolist (page-detail page-detail-list)
-	(push (cdr (assoc "id" page-detail)) page-list)
-	)
-      (dokuwiki-open-page (completing-read "Select a page to open: " page-list)))))
+      (progn
+        (dolist (page-detail page-detail-list)
+        	(push (cdr (assoc "id" page-detail)) page-list))
+        page-list))))
+
+(defun dokuwiki-list-pages ()
+  "Show a selectable list containing pages from the current wiki."
+  (interactive)
+  (dokuwiki-open-page (completing-read "Select a page to open: " (dokuwiki-get-page-list))))
+
+
+(defun dokuwiki-insert-link-from-list ()
+  "Insert link from wiki page list"
+  (interactive)
+  (insert (concat "[[" (completing-read "Select a page to link: " (dokuwiki-get-page-list)) "]]")))
 
 ;; Helpers
 (defun dokuwiki--credentials ()
