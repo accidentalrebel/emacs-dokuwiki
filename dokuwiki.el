@@ -98,6 +98,7 @@ buffer is saved."
       (when page-content
 	(progn (insert page-content)
 		(with-current-buffer (get-buffer (concat page-name ".dwiki")) (dokuwiki-mode))
+        (beginning-of-buffer)
 	)
       )
 )))
