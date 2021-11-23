@@ -4,7 +4,7 @@
 
 ;; Author: Juan Karlo Licudine <accidentalrebel@gmail.com>
 ;; URL: http://www.github.com/accidentalrebel/emacs-dokuwiki
-;; Version: 1.1.0
+;; Version: 1.1.1
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "24.3") (xml-rpc "1.6.8"))
 
@@ -69,7 +69,7 @@
 	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
       (message "Login successful!")
       (setq dokuwiki--has-successfully-logged-in t)
-;      (dokuwiki-list-pages)
+      (dokuwiki-list-pages)
 )))
 
 (defun dokuwiki-open-page (page-name-or-url)
