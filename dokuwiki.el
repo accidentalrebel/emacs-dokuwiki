@@ -1,10 +1,10 @@
-;;; dokuwiki.el --- Edit Remote DokuWiki Pages Using XML-RPC
+;;; dokuwiki.el --- Edit Remote DokuWiki Pages Using XML-RPC  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017 Juan Karlo Licudine
 
 ;; Author: Juan Karlo Licudine <accidentalrebel@gmail.com>
 ;; URL: http://www.github.com/accidentalrebel/emacs-dokuwiki
-;; Version: 1.0.0
+;; Version: 1.1.2
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "24.3") (xml-rpc "1.6.8"))
 
@@ -38,6 +38,7 @@
 
 (require 'xml-rpc)
 (require 'auth-source)
+(require 'dokuwiki-mode)
 
 (defgroup dokuwiki nil
   "Edit remote Dokuwiki pages using XML-RPC"
@@ -67,7 +68,8 @@
     (if (not (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password))
 	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
       (message "Login successful!")
-      (setq dokuwiki--has-successfully-logged-in t))))
+      (setq dokuwiki--has-successfully-logged-in t)
+      (dokuwiki-list-pages))))
 
 (defun dokuwiki-open-page (page-name-or-url)
   "Opens a page from the wiki.
@@ -94,7 +96,8 @@ buffer is saved."
       (erase-buffer)
       (when page-content
 	(progn (insert page-content)
-	(dokuwiki-mode))))))
+		(with-current-buffer (get-buffer (concat page-name ".dwiki")) (dokuwiki-mode))
+        (beginning-of-buffer))))))
 
 (defun dokuwiki-save-page ()
   "Save the current buffer as a page in the wiki.
@@ -131,7 +134,7 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
       (user-error "Login first before listing the pages")
     (let ((page-detail-list (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getAllPages))
 	  (page-list ()))
-      (progn 
+      (progn
         (dolist (page-detail page-detail-list)
         	(push (cdr (assoc "id" page-detail)) page-list))
         page-list))))
