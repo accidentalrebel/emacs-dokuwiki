@@ -8,6 +8,7 @@ Edit remote Dokuwiki pages using XML-RPC
 
 Currently, the package can edit, create, and save pages. There is rudimentary complition provided for inter-linking as well as keybindings to launch a page list menu (jump to page or insert link). 
 
+![screencast](emacs-dokuwiki.gif)
 # Installation #
 This package is on melpa as `dokuwiki`! The easiest way to get it is with [`use-package`](https://github.com/jwiegley/use-package). Pair that with <kbd>M-x package-install [`quelpa-use-package`](https://github.com/quelpa/quelpa-use-package)</kbd> to get the most up-to-date (and buggy) version.
 
@@ -18,15 +19,17 @@ This package is on melpa as `dokuwiki`! The easiest way to get it is with [`use-
   :ensure t
   :init
    (defun my-wiki ()
-     "Open a page on my wiki"
+     "Open a page on my wiki."
      (interactive)
      (require 'dokuwiki)
      (dokuwiki-launch "https://www.mysite.com/wiki/lib/exe/xmlrpc.php" "myuser"))
-  :config
-   (dokuwiki-setup)  ; default key-bindings, link completion at point (dokuwiki-cap)
-   (company-mode 1)  ; links as typing if starting with colon like ':foo:bar'
-   (flyspell-mode 1)
-)
+  :hook
+  ((dokuwiki-open-page .
+    (lambda ()
+      (dokuwiki-setup) ; minimal keybindings, cap hook
+      (company-mode 1) ; completion as typing
+      (display-line-numbers-mode -1)
+      (flyspell-mode 1)))))
 ```
 
 Alternatively, you can `git clone https://github.com/accidentalrebel/emacs-dokuwiki.git ~/.emacs.d/dokuwiki` with `(require 'dokuwiki)` in `~/.emacs.d/init.el` and manage configation as you please.
@@ -46,6 +49,7 @@ Alternatively, you can `git clone https://github.com/accidentalrebel/emacs-dokuw
 1. config and evalute use-package call (as detailed in [Installation](#installation))
    * wrap `dokuwiki-launch` with your wiki settings, e.g. `my-wiki`
    * optionally add credentials to `~/.authinfo` (example [below](#auth-source-credentials))
+   * see `dokuwiki-open-page-hook` to setup buffer
 2. <kbd>M-x my-wiki</kbd> as defined above
 3. select page, edit, and save
    * <kbd>C-c g </kbd> `dokuwiki-list-pages-cached` - menu to select page to edit (prefix with <kbd>C-u</kbd> to refresh cached page list)
@@ -109,4 +113,5 @@ Contributions are always welcome. Feel free to submit a pull request, create an 
 # To Do #
   * Add ability to preview page changes
   * Better support multiple wikis
+  * image paste -> upload. downoad for inline images
 

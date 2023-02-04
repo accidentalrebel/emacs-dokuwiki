@@ -15,7 +15,8 @@
 
 ;;; Commentary:
 
-;; Provides a way to edit a remote Dokuwiki wiki on Emacs.  Uses Dokuwiki's XML-RPC API.
+;; Provides a way to edit a remote Dokuwiki wiki on Emacs.
+;; Uses Dokuwiki's XML-RPC API.
 
 ;; Usage:
 ;; (require 'dokuwiki) ;; unless installed as a package
@@ -40,11 +41,12 @@
 ;;; Code:
 
 (require 'xml-rpc)
+(require 'ffap)
 (require 'auth-source)
 (require 'dokuwiki-mode)
 
 (defgroup dokuwiki nil
-  "Edit remote Dokuwiki pages using XML-RPC"
+  "Edit remote Dokuwiki pages using XML-RPC."
   :group 'dokuwiki)
 
 (defcustom dokuwiki-xml-rpc-url ""
@@ -75,6 +77,8 @@
       (dokuwiki-pages-get-list-cache t)
       (dokuwiki-list-pages-cached))))
 
+(defvar dokuwiki-open-page-hook nil
+  "Hooks after logging in to a dokuwiki.")
 (defun dokuwiki-open-page (page-name-or-url)
   "Opens a page from the wiki.
 
@@ -98,12 +102,16 @@ buffer is saved."
       (get-buffer-create (concat page-name ".dwiki"))
       (switch-to-buffer (concat page-name ".dwiki"))
       (erase-buffer)
-      (when page-content
-        (progn
-	  (insert page-content)
-          (with-current-buffer (get-buffer (concat page-name ".dwiki")) (dokuwiki-mode))
-          (dokuwiki-mode)               ;this happens automatically?
-          (beginning-of-buffer))))))
+      (if page-content
+          (progn
+            (insert page-content)
+            (with-current-buffer
+                (get-buffer (concat page-name ".dwiki"))))
+        ;; no content? make page name the first heading
+        (insert "====== " (replace-regexp-in-string ".*:" "" page-name ) " ======"))
+      (dokuwiki-mode)               ; should this go in the launch-hook ?
+      (goto-char (point-min))
+      (run-hooks 'dokuwiki-open-page-hook))))
 
 (defun dokuwiki-save-page ()
   "Save the current buffer as a page in the wiki.
@@ -135,7 +143,7 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
       (message "The title of the wiki is \"%s\"" dokuwiki-title))))
 
 (defun dokuwiki-get-page-list ()
-  "Extract 'id' from page info"
+  "Extract 'id' from page info."
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before listing the pages")
     (let ((page-detail-list (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getAllPages))
@@ -202,13 +210,15 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
       dokuwiki-cached-page-list)
 
 (defun dokuwiki-insert-link-from-cache ()
-  "Show a selectable list containing pages from the current wiki.  Refresh when univesal arg."
+  "Show a selectable list containing pages from the current wiki.
+Refresh when univesal arg."
   (interactive)
   (if-let (page (completing-read "Select a page to link: " (dokuwiki-pages-get-list-cache current-prefix-arg)))
       (insert (concat "[[:" page "]] "))))
 
 (defun dokuwiki-list-pages-cached ()
-  "Show a selectable list containing pages from the current wiki. Refresh when univerasl arg."
+  "Show a selectable list containing pages from the current wiki.
+Refresh when univerasl arg."
   (interactive)
   (dokuwiki-open-page (completing-read "Select a page to open: " (dokuwiki-pages-get-list-cache current-prefix-arg))))
 
@@ -231,20 +241,23 @@ is saved as \"wikiurl.com/wiki-page\".  On the other hand, a buffer of
 
 ;; completion-at-point-functions
 (defun dokuwiki--back-to-space-or-line (pt)
-  "Get point of the closest space, or beginning of line if first.  Start search at PT."
+  "Get point of the closest space, or beginning of line if first.
+Start search at PT."
   (let ((this-line (line-beginning-position)))
     (save-excursion
       (goto-char pt)
       (skip-syntax-backward "^ ")
       (max (point) this-line))))
 
-(defun  dokuwiki--capf-link-wrap (string status)
-  "When capf STATUS is finished, make the STRING into a link."
+(defun  dokuwiki--capf-link-wrap (comp-string status)
+"When capf STATUS is finished, make the COMP-STRING into a link.
+NB COMP-STRING not used: link-wrap using point instead."
   (when (eq status 'finished) (dokuwiki-link-wrap)))
 
 (defun dokuwiki--capf ()
-  "Use DOKUWIKI-CACHED-PAGE-LIST for completion.  Wrap as link when finished."
-  (when (and dokuwiki-cached-page-list (looking-back ":[a-zA-Z:]+"))
+  "Use DOKUWIKI-CACHED-PAGE-LIST for completion.
+Wrap as link when finished."
+  (when (and dokuwiki-cached-page-list (looking-back ":[a-zA-Z:]+" (-(point)(line-beginning-position))))
     ;; (looking-back ":[a-zA-Z:]+" (-(point)(line-beginning-position)) t)
     (list (dokuwiki--back-to-space-or-line (match-beginning 0))
           (match-end 0)
@@ -262,6 +275,7 @@ NB text is :a:b not /a/b but same file pattern rules apply."
     ;; skip ahead of [[ if looking at first part of link
     (skip-chars-forward "[")
     (skip-chars-backward "]")
+    ;; requires ffap
     (ffap-string-at-point 'file)))
 
 (defun dokuwiki-ffap ()
@@ -283,11 +297,11 @@ NB text is :a:b not /a/b but same file pattern rules apply."
 ;;; convient vairalbe setter
 
 (defun dokuwiki-launch (url user)
-  "Login to dokuwiki using URL and USER.  Open a page.  Set NO-LAUNCH for no page jump."
+  "Login to dokuwiki using URL and USER.  Open a page.
+Set NO-LAUNCH for no page jump."
   (setq dokuwiki-xml-rpc-url url
         dokuwiki-login-user-name user)
-  (dokuwiki-login)
-  (dokuwiki-mode))
+  (dokuwiki-login))
 
 (defun dokuwiki-in-browser ()
   "Open current page in the borwser.  Assumes fixed xmlrpc url suffixe."
