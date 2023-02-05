@@ -317,14 +317,19 @@ Note: dokuwiki-mode is a separate package, modifying it's map."
   (interactive)
   (eval-after-load 'dokuwiki
     '(progn
+       ;; complete links as they are typed if starting with ':'
        (add-hook 'completion-at-point-functions 'dokuwiki--capf nil 'local)
-       ;; not sure hwo to do this
+
+       ;; not sure how to get new font locking (links as buttons) to work
        ;; (add-hook 'dokuwiki-mode (lambda () (font-lock-add-keywords nil dokuwiki-font-lock-link)))
-       (define-key dokuwiki-mode-map (kbd "C-c g") #'dokuwiki-list-pages-cached)
-       (define-key dokuwiki-mode-map (kbd "C-c s") #'dokuwiki-save-page)
-       (define-key dokuwiki-mode-map (kbd "C-c o") #'dokuwiki-ffap)
-       (define-key dokuwiki-mode-map (kbd "C-c b") #'dokuwiki-in-browser)
-       (define-key dokuwiki-mode-map (kbd "C-c l") #'dokuwiki-insert-link-from-cache))))
+
+       ;; push local bindings on the buffer
+       ;; reviously updated dokuwiki-mode-map. but that messes up zim-wiki-mode
+       (local-set-key (kbd "C-c g") #'dokuwiki-list-pages-cached)
+       (local-set-key (kbd "C-c s") #'dokuwiki-save-page)
+       (local-set-key (kbd "C-c o") #'dokuwiki-ffap)
+       (local-set-key (kbd "C-c b") #'dokuwiki-in-browser)
+       (local-set-key (kbd "C-c l") #'dokuwiki-insert-link-from-cache))))
 
 
 (provide 'dokuwiki)

@@ -100,10 +100,10 @@ This function is intended to be called on a buffer created after opening a page.
   
   ```emacs-lisp
 (use-package dokuwiki-mode
-  :quelpa ((dokuwiki :fetcher github :repo "WillForan/dokuwiki-mode") :upgrade t)
+  :quelpa ((dokuwiki-mode :fetcher github :repo "WillForan/emacs-dokuwiki-mode") :upgrade t)
   :ensure t
   :config
-   (require outline-magic)
+   (require 'outline-magic)
    (flyspell-mode 1))
   ```
 
