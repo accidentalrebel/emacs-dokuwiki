@@ -53,6 +53,11 @@
   :group 'dokuwiki
   :type 'string)
 
+(defcustom dokuwiki-page-opened-hook ()
+  "Functions to run upon opening a wiki page."
+  :group 'dokuwiki
+  :type '(repeat function))
+
 (defvar dokuwiki--has-successfully-logged-in nil
   "A variable that is set to true once successfully logged in to a wiki.")
 
@@ -93,7 +98,8 @@ buffer is saved."
       (switch-to-buffer (concat page-name ".dwiki"))
       (erase-buffer)
       (when page-content
-	(insert page-content)))))
+	(insert page-content))
+      (run-hooks 'dokuwiki-page-opened-hook))))
 
 (defun dokuwiki-save-page ()
   "Save the current buffer as a page in the wiki.
