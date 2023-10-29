@@ -58,6 +58,11 @@
   :group 'dokuwiki
   :type '(repeat function))
 
+(defcustom dokuwiki-use-dokuwiki-mode nil
+  "Whether to enable `dokuwiki-mode' upon opening a wiki page."
+  :group 'dokuwiki
+  :type 'boolean)
+
 (defvar dokuwiki--has-successfully-logged-in nil
   "A variable that is set to true once successfully logged in to a wiki.")
 
@@ -72,7 +77,11 @@
     (if (not (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password))
 	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
       (message "Login successful!")
-      (setq dokuwiki--has-successfully-logged-in t))))
+      (setq dokuwiki--has-successfully-logged-in t))
+    (if dokuwiki-use-dokuwiki-mode
+        (if (featurep 'dokuwiki-mode)
+            (add-hook 'dokuwiki-page-opened-hook #'dokuwiki-mode)
+          (user-error "dokuwiki-mode not installed: can't enable dokuwiki-mode")))))
 
 (defun dokuwiki-open-page (page-name-or-url)
   "Opens a page from the wiki.
