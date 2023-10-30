@@ -59,6 +59,16 @@
   :group 'dokuwiki
   :type 'string)
 
+(defcustom dokuwiki-page-opened-hook ()
+  "Functions to run upon opening a wiki page."
+  :group 'dokuwiki
+  :type '(repeat function))
+
+(defcustom dokuwiki-use-dokuwiki-mode t
+  "Whether to enable `dokuwiki-mode' upon opening a wiki page."
+  :group 'dokuwiki
+  :type 'boolean)
+
 (defvar dokuwiki--has-successfully-logged-in nil
   "A variable that is set to true once successfully logged in to a wiki.")
 
@@ -71,14 +81,22 @@
          (login-user-name (plist-get credentials :user))
          (login-password (plist-get credentials :password)))
     (if (not (xml-rpc-method-call xml-rpc-url 'dokuwiki.login login-user-name login-password))
-	(error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
+        (error "Login unsuccessful! Check if your dokuwiki-xml-rpc-url or login credentials are correct!")
       (message "Login successful!")
       (setq dokuwiki--has-successfully-logged-in t)
       (dokuwiki-pages-get-list-cache t)
-      (dokuwiki-list-pages-cached))))
+      (dokuwiki-list-pages-cached)
+      (if dokuwiki-use-dokuwiki-mode
+          (if (featurep 'dokuwiki-mode)
+              (add-hook #'dokuwiki-page-opened-hook #'dokuwiki-mode)
+            (user-error "Dokuwiki-mode not installed: can't enable dokuwiki-mode"))))))
 
-(defvar dokuwiki-open-page-hook nil
-  "Hooks after logging in to a dokuwiki.")
+(defun dokuwiki--insert-top-heading (page-name)
+  "When there's no content, we want a top level heading matching PAGE-NAME."
+   (with-current-buffer
+       (get-buffer (concat page-name ".dwiki")))
+       (insert "====== " (replace-regexp-in-string ".*:" "" page-name ) " ======"))
+
 (defun dokuwiki-open-page (page-name-or-url)
   "Opens a page from the wiki.
 
@@ -94,7 +112,7 @@ buffer is saved."
   (if (not dokuwiki--has-successfully-logged-in)
       (user-error "Login first before opening a page")
     (let* ((page-name (car (last (split-string page-name-or-url "/"))))
-	  (page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
+	   (page-content (xml-rpc-method-call dokuwiki-xml-rpc-url 'wiki.getPage page-name)))
       (message "Page name is \"%s\"" page-name)
       (if (not page-content)
 	  (message "Page not found in wiki. Creating a new buffer with page name \"%s\"" page-name)
@@ -102,16 +120,9 @@ buffer is saved."
       (get-buffer-create (concat page-name ".dwiki"))
       (switch-to-buffer (concat page-name ".dwiki"))
       (erase-buffer)
-      (if page-content
-          (progn
-            (insert page-content)
-            (with-current-buffer
-                (get-buffer (concat page-name ".dwiki"))))
-        ;; no content? make page name the first heading
-        (insert "====== " (replace-regexp-in-string ".*:" "" page-name ) " ======"))
-      (dokuwiki-mode)               ; should this go in the launch-hook ?
+      (if page-content (insert page-content) (dokuwiki--insert-top-heading page-name))
       (goto-char (point-min))
-      (run-hooks 'dokuwiki-open-page-hook))))
+      (run-hooks #'dokuwiki-page-opened-hook))))
 
 (defun dokuwiki-save-page ()
   "Save the current buffer as a page in the wiki.

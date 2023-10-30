@@ -24,7 +24,7 @@ This package is on melpa as `dokuwiki`! The easiest way to get it is with [`use-
      (require 'dokuwiki)
      (dokuwiki-launch "https://www.mysite.com/wiki/lib/exe/xmlrpc.php" "myuser"))
   :hook
-  ((dokuwiki-open-page .
+  ((dokuwiki-page-opened .
     (lambda ()
       (dokuwiki-setup) ; minimal keybindings, cap hook
       (company-mode 1) ; completion as typing
